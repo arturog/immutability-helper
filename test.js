@@ -399,4 +399,10 @@ describe('update', function() {
     expect(update.bind(null, obj, {$merge: {a: 'b'}})).toNotThrow()
   });
 
+  it('does a shallow compare for reference equality', function() {
+    let a = {b: {c: {d : [4, 5]}}};
+    let z = update(a, {b: {c: {d : {$set: [4, 5]}}}});
+    expect(a).toBe(z)
+  })
+
 });

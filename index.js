@@ -28,6 +28,22 @@ function copy(object) {
   }
 }
 
+function shallowEqual(a, b) {
+  if (a === b) { return true; }
+  if (typeof a !== 'object' || typeof b !== 'object') { return false; }
+  var aKeys = getAllKeys(a);
+  var bKeys = getAllKeys(b);
+  if (aKeys.length !== bKeys.length) { return false; }
+  for (var i = 0, length = aKeys.length; i < length; i++) {
+    var aKey = aKeys[i];
+    var bKey = bKeys[i]
+    if (aKey !== bKey || a[aKey] !== b[bKey]) {
+      return false
+    }
+  }
+  return true
+}
+
 function newContext() {
   var commands = assign({}, defaultCommands);
   update.extend = function(directive, fn) {
@@ -61,7 +77,7 @@ function newContext() {
         nextObject = commands[key](spec[key], nextObject, spec, object);
       } else {
         var nextValueForKey = update(object[key], spec[key]);
-        if (nextValueForKey !== nextObject[key]) {
+        if (!shallowEqual(nextValueForKey, nextObject[key])) {
           if (nextObject === object) {
             nextObject = copy(object);
           }
