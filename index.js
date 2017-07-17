@@ -19,7 +19,7 @@ var getAllKeys = typeof Object.getOwnPropertySymbols === 'function' ?
 /* istanbul ignore next */
 function copy(object) {
   if (object instanceof Array) {
-    return assign(object.constructor(), object);
+    return assign(object.constructor(object.length), object)
   } else if (object && typeof object === 'object') {
     var prototype = object.constructor && object.constructor.prototype
     return assign(Object.create(prototype || null), object);
@@ -33,6 +33,7 @@ function newContext() {
   update.extend = function(directive, fn) {
     commands[directive] = fn;
   };
+  update.isEquals = function(a, b) { return a === b; };
 
   return update;
 
@@ -58,10 +59,14 @@ function newContext() {
     var index, key;
     getAllKeys(spec).forEach(function(key) {
       if (hasOwnProperty.call(commands, key)) {
+        var objectWasNextObject = object === nextObject;
         nextObject = commands[key](spec[key], nextObject, spec, object);
+        if (objectWasNextObject && update.isEquals(nextObject, object)) {
+          nextObject = object;
+        }
       } else {
         var nextValueForKey = update(object[key], spec[key]);
-        if (nextValueForKey !== nextObject[key]) {
+        if (!update.isEquals(nextValueForKey, nextObject[key])) {
           if (nextObject === object) {
             nextObject = copy(object);
           }
