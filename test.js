@@ -422,6 +422,15 @@ describe('update', function() {
     state.items.top = 0
     var state2 = update(state, { items: { 1: { strength: { $set: 3 } } } });
     expect(state2.items.top).toBe(0)
+
+    var state3 = update(state, { items: { $push: [{ name: 'Bob', strength: 2 }] } })
+    expect(state3.items.top).toBe(0)
+
+    var state4 = update(state, { items: { $unshift: [{ name: 'Wonder Woman', strength: 1000 }] } })
+    expect(state4.items.top).toBe(0)
+
+    var state5 = update(state, { items: { $splice: [[0, 1]] } })
+    expect(state4.items.top).toBe(0)
   });
 
 });

@@ -1,7 +1,6 @@
 var invariant = require('invariant');
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
-var splice = Array.prototype.splice;
 
 var assign = Object.assign || /* istanbul ignore next */ function assign(target, source) {
   getAllKeys(source).forEach(function(key) {
@@ -82,18 +81,26 @@ function newContext() {
 var defaultCommands = {
   $push: function(value, nextObject, spec) {
     invariantPushAndUnshift(nextObject, spec, '$push');
-    return value.length ? nextObject.concat(value) : nextObject;
+    if (value.length) {
+      nextObject = copy(nextObject)
+      nextObject.push.apply(nextObject, value)
+    }
+    return nextObject;
   },
   $unshift: function(value, nextObject, spec) {
     invariantPushAndUnshift(nextObject, spec, '$unshift');
-    return value.length ? value.concat(nextObject) : nextObject;
+    if (value.length) {
+      nextObject = copy(nextObject)
+      nextObject.unshift.apply(nextObject, value)
+    }
+    return nextObject;
   },
   $splice: function(value, nextObject, spec, originalObject) {
     invariantSplices(nextObject, spec);
     value.forEach(function(args) {
       invariantSplice(args);
       if (nextObject === originalObject && args.length) nextObject = copy(originalObject);
-      splice.apply(nextObject, args);
+      nextObject.splice.apply(nextObject, args);
     });
     return nextObject;
   },
